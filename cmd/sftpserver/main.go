@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -15,19 +16,27 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+var (
+	readOnly    bool
+	debugStderr bool
+	debugStream io.Writer
+	infoLog     *log.Logger
+	errorLog    *log.Logger
+)
+
 // Based on example server code from golang.org/x/crypto/ssh and server_standalone
 func main() {
-
-	var (
-		readOnly    bool
-		debugStderr bool
-	)
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	flag.BoolVar(&readOnly, "R", false, "read-only server")
 	flag.BoolVar(&debugStderr, "e", false, "debug to stderr")
 	flag.Parse()
 
-	debugStream := ioutil.Discard
+	infoLog.Printf("readonly    = %v", readOnly)
+	infoLog.Printf("debugStderr = %v", debugStderr)
+
+	debugStream = ioutil.Discard
 	if debugStderr {
 		debugStream = os.Stderr
 	}
@@ -48,12 +57,12 @@ func main() {
 
 	privateBytes, err := ioutil.ReadFile("id_rsa")
 	if err != nil {
-		log.Fatal("Failed to load private key", err)
+		errorLog.Fatal("Failed to load private key", err)
 	}
 
 	private, err := ssh.ParsePrivateKey(privateBytes)
 	if err != nil {
-		log.Fatal("Failed to parse private key", err)
+		errorLog.Fatal("Failed to parse private key", err)
 	}
 
 	config.AddHostKey(private)
@@ -62,27 +71,29 @@ func main() {
 	// accepted.
 	listener, err := net.Listen("tcp", "0.0.0.0:2022")
 	if err != nil {
-		log.Fatal("failed to listen for connection", err)
+		errorLog.Fatal("failed to listen for connection", err)
 	}
-	fmt.Printf("Listening on %v\n", listener.Addr())
+	infoLog.Printf("Listening on %v\n", listener.Addr())
 	for {
 		nConn, err := listener.Accept()
 		if err != nil {
-			log.Fatal("failed to accept incoming connection", err)
+			errorLog.Fatal("failed to accept incoming connection", err)
 		}
 
 		// Before use, a handshake must be performed on the incoming
 		// net.Conn.
 		sconn, chans, reqs, err := ssh.NewServerConn(nConn, config)
 		if err != nil {
-			log.Fatal("failed to handshake", err)
+			errorLog.Fatal("failed to handshake", err)
 		}
-		log.Println("login detected:", sconn.User())
-		fmt.Fprintf(debugStream, "SSH server established\n")
+		infoLog.Println("login detected:", sconn.User())
+		infoLog.Println(debugStream, "SSH server established\n")
 
 		// The incoming Request channel must be serviced.
+		// Discard all global out-of-band Requests
 		go ssh.DiscardRequests(reqs)
-		go handleServerConn(chans, debugStream, readOnly)
+		// Accept all channels
+		go handleChannels(chans)
 	}
 
 }
