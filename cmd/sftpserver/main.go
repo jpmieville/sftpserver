@@ -84,7 +84,8 @@ func main() {
 		// net.Conn.
 		sconn, chans, reqs, err := ssh.NewServerConn(nConn, config)
 		if err != nil {
-			errorLog.Fatal("failed to handshake", err)
+			errorLog.Print("failed to handshake", err)
+			continue
 		}
 		infoLog.Println("login detected:", sconn.User())
 		infoLog.Println("SSH server established")
