@@ -28,7 +28,7 @@ func handleChannel(newChannel ssh.NewChannel) {
 	}
 	channel, requests, err := newChannel.Accept()
 	if err != nil {
-		infoLog.Printf("could not accept channel.", err)
+		infoLog.Print("could not accept channel.", err)
 		return
 	}
 	fmt.Fprintf(debugStream, "Channel accepted\n")
@@ -76,7 +76,7 @@ func handleChannel(newChannel ssh.NewChannel) {
 		server.Close()
 		infoLog.Print("sftp client exited session.")
 	} else if err != nil {
-		infoLog.Printf("sftp server completed with error:", err)
+		infoLog.Print("sftp server completed with error:", err)
 		return
 	}
 }

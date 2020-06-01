@@ -87,7 +87,7 @@ func main() {
 			errorLog.Fatal("failed to handshake", err)
 		}
 		infoLog.Println("login detected:", sconn.User())
-		infoLog.Println(debugStream, "SSH server established\n")
+		infoLog.Println("SSH server established")
 
 		// The incoming Request channel must be serviced.
 		// Discard all global out-of-band Requests
