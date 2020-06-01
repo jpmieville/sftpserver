@@ -1,2 +1,6 @@
 id_rsa*
 files/*
+sftpserver
+sftpserver.exe
+keygen
+keygen.exe
