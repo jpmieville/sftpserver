@@ -1,5 +1,40 @@
+# project-specific ignores
 id_rsa*
 files/*
-.idea/*
-*.exe
 
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe # Windows binaries
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test # Test binaries
+
+# Code coverage profiles and other test artifacts
+*.out # Go coverage profiles
+coverage.*
+*.coverprofile
+profile.cov
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# env file
+.env*
+
+# Editor/IDE
+.idea/
+.vscode/
+key/ssh_key_for_sisa.ppk
+key/ssh_key_for_sisa.pub
+sftpserver.exe
+keygen.exe

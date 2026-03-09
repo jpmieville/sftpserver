@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -64,8 +63,6 @@ func handleChannel(newChannel ssh.NewChannel) {
 		fmt.Fprintf(debugStream, "Read write server\n")
 	}
 
-	serverOptions = append(serverOptions, setDir())
-
 	server, err := sftp.NewServer(
 		channel,
 		serverOptions...,
@@ -81,25 +78,5 @@ func handleChannel(newChannel ssh.NewChannel) {
 	} else if err != nil {
 		infoLog.Print("sftp server completed with error:", err)
 		return
-	}
-}
-
-func setDir() sftp.ServerOption {
-	err := os.Chdir("./in")
-	if err != nil {
-		err2 := os.Mkdir("./in", 0755)
-		if err2 != nil {
-			errorLog.Fatalf("sftpserver could not create the './in' directory: %v : %v", err, err2)
-		}
-		infoLog.Print("directory './in' created")
-	}
-	infoLog.Print("chdir to in")
-	currentDir, err2 := os.Getwd()
-	if err2 != nil {
-		errorLog.Printf("sftpserver could not list the current working directory: %v", err2)
-	}
-	infoLog.Printf("current working directory '%s'", currentDir)
-	return func(s *sftp.Server) error {
-		return nil
 	}
 }
