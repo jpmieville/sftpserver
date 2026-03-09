@@ -64,6 +64,18 @@ func main() {
 		infoLog.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	}
 
+	// Read SSH private key before changing directory (line 74)
+	// This ensures relative key file paths work correctly
+	privateBytes, err := os.ReadFile(keyFile)
+	if err != nil {
+		errorLog.Fatalf("Failed to load private key from %s: %v", keyFile, err)
+	}
+
+	private, err := ssh.ParsePrivateKey(privateBytes)
+	if err != nil {
+		errorLog.Fatal("Failed to parse private key", err)
+	}
+
 	// Setup SFTP root directory. This is a process-wide operation.
 	if _, err := os.Stat(sftpRoot); os.IsNotExist(err) {
 		if err := os.MkdirAll(sftpRoot, 0755); err != nil {
@@ -99,16 +111,6 @@ func main() {
 			}
 			return nil, fmt.Errorf("password rejected for %q", c.User())
 		},
-	}
-
-	privateBytes, err := os.ReadFile(keyFile)
-	if err != nil {
-		errorLog.Fatalf("Failed to load private key from %s: %v", keyFile, err)
-	}
-
-	private, err := ssh.ParsePrivateKey(privateBytes)
-	if err != nil {
-		errorLog.Fatal("Failed to parse private key", err)
 	}
 
 	config.AddHostKey(private)
