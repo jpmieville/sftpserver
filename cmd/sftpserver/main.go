@@ -4,11 +4,13 @@ package main
 // Serves files from a defined root directory.
 
 import (
+	"crypto/rand"
 	"crypto/subtle"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net"
 	"os"
 
@@ -40,9 +42,27 @@ func main() {
 	flag.StringVar(&host, "host", "0.0.0.0", "Host to listen on")
 	flag.StringVar(&port, "port", "2022", "Port to listen on")
 	flag.StringVar(&user, "user", "oracle", "Username for authentication")
-	flag.StringVar(&pass, "pass", "jpmorgan4oracle", "Password for authentication")
+	flag.StringVar(&pass, "pass", "", "Password for authentication. If not set, a random one is generated.")
 	flag.StringVar(&keyFile, "keyfile", "id_rsa", "Path to SSH private key")
 	flag.Parse()
+
+	if pass == "" {
+		const passwordLength = 16
+		const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		b := make([]byte, passwordLength)
+		for i := range b {
+			n, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+			if err != nil {
+				errorLog.Fatalf("Failed to generate random password: %v", err)
+			}
+			b[i] = chars[n.Int64()]
+		}
+		pass = string(b)
+		infoLog.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		infoLog.Printf("!!! No password provided. Using randomly generated password: %s", pass)
+		infoLog.Println("!!! Use the -pass flag to set a permanent password.")
+		infoLog.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	}
 
 	// Setup SFTP root directory. This is a process-wide operation.
 	if _, err := os.Stat(sftpRoot); os.IsNotExist(err) {
