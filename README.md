@@ -2,11 +2,7 @@
 
 A lightweight, configurable SFTP server written in Go, designed for testing, internal development, and validating SFTP client implementations. This project also includes a utility for generating RSA SSH key pairs.
 
-<<<<<<< HEAD
 **Note:** This server is intended for development and testing purposes. While it supports configuration via flags, please review security requirements before using it in a production environment.
-=======
-It is a lightweight SFTP server for internal use. I created it to test and validate some other developments. The code is based on the code found in the SFTP library documentation. I modified it so that it doesn't stop after the first connection.  I tested it on Windows and Linux, and on Mac OS. I recommend not to use it in production because the user and password are hardcoded in the code. 
->>>>>>> 5c9b8e1252df6b06c98ff76002a211a2f1b87aab
 
 ## Features
 
